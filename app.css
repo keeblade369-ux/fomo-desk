@@ -1,3 +1,10 @@
 body{margin:0;font-family:system-ui,sans-serif;background:#0b0d10;color:#e8eaed}
 .offline{max-width:420px;margin:20vh auto;text-align:center}
 .offline h1{font-size:28px;margin:0 0 8px}.offline p{color:#9aa0a6}
+.live{max-width:720px;margin:0 auto;padding:16px}
+.live header{display:flex;justify-content:space-between;align-items:baseline}
+.live h1{font-size:22px;margin:8px 0}#updated{color:#9aa0a6;font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.card{background:#161a1f;border-radius:12px;padding:12px;text-align:center}
+.card b{display:block;font-size:22px}.card span{color:#9aa0a6;font-size:12px}
+#screen{width:100%;border-radius:12px;margin-top:8px}
