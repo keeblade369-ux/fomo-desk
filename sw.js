@@ -1,4 +1,4 @@
-// CACHE_V=8c · no asset cache; version query busts the registered script.
+// CACHE_V=8d · no asset cache; version query busts the registered script.
 // Service worker · web push lands in Step 11 (POST /api/push, VAPID public key only here).
 // Until then it only shows a push if one arrives; no caching of desk data.
 self.addEventListener("install", function () { self.skipWaiting(); });

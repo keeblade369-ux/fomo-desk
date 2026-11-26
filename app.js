@@ -146,7 +146,8 @@
   // ---------- shell ----------
   function shell() {
     document.body.innerHTML = '<div id="view"></div><nav class="tabbar">' + ["home", "bots", "activity", "account"].map(function (t) {
-      return '<button data-tab="' + t + '" aria-label="' + t + '">' + ICON[t] + "<span>" + t.charAt(0).toUpperCase() + t.slice(1) + "</span></button>";
+      var label = { home: "Home", bots: "Agents", activity: "Activity", account: "Account" }[t];
+      return '<button data-tab="' + t + '" aria-label="' + label + '">' + ICON[t] + "<span>" + label + "</span></button>";
     }).join("") + "</nav>";
     view = $("#view");
     document.body.addEventListener("click", onClick);
@@ -184,7 +185,7 @@
       '<div class="ranges">' + ["LIVE", "1H", "4H", "1D", "1W", "ALL"].map(function (r) { return '<button data-range="' + r + '" class="' + (S.range === r ? "on" : "") + '">' + r + "</button>"; }).join("") + "</div>" +
       '<div class="live" data-full><img id="f0" alt=""><img id="f1" alt=""><div class="tl" id="ftl"><span class="ldot grey"></span>No frame yet</div><div class="tr">' + lane + "</div></div>" +
       '<div class="lastorder"><span class="num">' + loTxt + '</span><span class="checks">' + ck("screen", "screen") + ck("api", "api") + ck("chain", "chain") + "</span></div>" +
-      '<div class="sect"><h2>Bots · ' + s.botsRunning + ' running</h2><button data-go="/bots">See all</button></div>' +
+      '<div class="sect"><h2>Agents · ' + s.botsRunning + ' running</h2><button data-go="/bots">See all</button></div>' +
       '<div class="carousel">' + bots.map(function (b) { return botCard(b, s.bots[b]); }).join("") + "</div>" +
       '<div class="sect"><h2>Activity</h2><button data-go="/activity">See all</button></div>' + actRows((S.activity || []).slice(0, 5), "Waiting for the first trade");
   }
@@ -266,7 +267,7 @@
   // ---------- BOTS ----------
   function bots() {
     var s = S.state;
-    var head = navbar("Bots") + '<h1 class="pg">Bots</h1>';
+    var head = navbar("Agents") + '<h1 class="pg">Agents</h1>';
     if (!s) return head + sk(260) + sk(260) + sk(260);
     return head + ["scanner", "analyst", "brain", "executor", "risk"].map(function (b) {
       var c = s.bots[b], ro = PLAN !== "A";
@@ -570,6 +571,6 @@
     setInterval(function () { if (Date.now() >= (S.err ? S.retryAt : S.nextAt || 0)) refresh(); var e = $("#errrow"); if (e && S.err) e.textContent = errRow().replace(/<[^>]+>/g, ""); }, 1000);
     setInterval(function () { if (route().name === "home" && !S.err || route().name === "home" && PLAN === "B") pullFrame(); }, PLAN === "A" ? 1000 : 15000);
     setTimeout(pullFrame, 300);
-    if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js?v=8c").catch(function () {});
+    if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js?v=8d").catch(function () {});
   }
 })();
