@@ -265,6 +265,7 @@
     var head = navbar("Audit", true);
     if (c === undefined) { loadCoin(mint); return head + sk(40, "60%") + sk(260) + sk(50); }
     if (c === null) return head + '<div class="empty">This coin is not in the desk data.</div>';
+    if (c._err) { return head + '<div class="empty">Can\'t reach the desk right now · ' + esc(c._err) + ' · it retries on its own</div>'; }
     var L = c.layers;
     var title = '<h1 class="pg">' + esc(c.symbol || c.name || short(mint)) + '</h1><div class="sub">' + esc(c.name || "") + " · " + short(mint) + "</div>";
     if (!L) return head + title + '<div class="empty">Not audited yet</div>';
@@ -274,7 +275,7 @@
       return '<div class="disc"><div class="c ' + st + '" data-i="' + i + '"><span class="reveal">' + (st === "ok" ? "✓" : st === "no" ? "✕" : "–") + '</span></div><div class="lv">' + esc(l.name) + '</div><div class="vv reveal num ' + (st === "ok" ? "up" : st === "no" ? "down" : "") + '">' + esc(l.value) + "</div></div>";
     }).join("") + "</div>" +
       '<div class="rows"><div class="row"><div class="m"><div class="t">' + (sc && sc.socialPts != null && c.social ? "Social +" + sc.socialPts : "Social: off") + "</div></div></div>" +
-      (sc ? '<div class="row"><div class="m"><div class="t">Score ' + sc.score + '</div><div class="s">' + (sc.passed ? "Passed" : "Failed") + (sc.reason ? " · " + esc(sc.reason) : "") + '</div></div><canvas class="ring" data-ring="' + sc.score + '"></canvas></div>' : "") +
+      (sc ? '<div class="row"><div class="m"><div class="t">Score ' + (sc.score == null ? "–" : sc.score) + '</div><div class="s">' + (sc.passed ? "Passed" : "Failed") + (sc.reason ? " · " + esc(sc.reason) : "") + '</div></div>' + (sc.score == null ? "" : '<canvas class="ring" data-ring="' + sc.score + '"></canvas>') + '</div>' : "") +
       '<div class="row"><div class="m"><div class="s">' + esc((L.find(function (l) { return l.source; }) || {}).source || "") + '</div></div><div class="v">' + fomoA(c.link) + "</div></div></div>";
   }
   function animateAudit() {
@@ -292,6 +293,7 @@
     var head = navbar("", true);
     if (c === undefined) { loadCoin(mint); return head + sk(34, "50%") + sk(18, "70%") + sk(60, "60%", 14) + sk(220, null, 14) + sk(60, null, 14); }
     if (c === null) return head + '<div class="empty">This coin is not in the desk data.</div>';
+    if (c._err) { return head + '<div class="empty">Can\'t reach the desk right now · ' + esc(c._err) + ' · it retries on its own</div>'; }
     var p = c.position, open = p && p.open;
     var paper = s && s.mode === "PAPER" ? ' <span class="pill paper">PAPER</span>' : "";
     var shield = c.shield ? '<span class="chip' + (c.shield === "8/8" ? "" : " bad") + '">' + c.shield + "</span>" : "";
@@ -303,7 +305,7 @@
       '<div class="big num" style="margin-top:10px;font-size:' + (c.price != null ? "44px" : "22px") + '">' + (c.price != null ? usd(c.price) : '<span style="color:var(--sec)">No price yet</span>') + "</div>" + se +
       '<div class="chartwrap" style="height:220px;margin-top:14px"><canvas id="candles"></canvas>' + (c.candles && c.candles.length ? "" : '<div class="empty" style="position:absolute;inset:60px 0 0">No price ticks in the desk yet</div>') + "</div>" +
       '<div class="tiles">' + tile("Market cap", compact(c.marketCap)) + tile("Liquidity", compact(c.liquidity)) + tile("Holders", c.holders != null ? c.holders.toLocaleString() : null) + "</div>" +
-      (p ? '<div class="rows" style="margin-top:14px"><div class="row"><div class="m"><div class="t num">Your position · ' + usd(p.sizeUsd, 2) + " in · " + p.bot + '</div><div class="s">' + (open ? "Open · stop " + usd(p.stop) : "Closed · " + esc(p.exitReason || "") + (p.pnlUsd != null ? " · " + usd(p.pnlUsd, 2) : "")) + "</div></div></div></div>" :
+      (p ? '<div class="rows" style="margin-top:14px"><div class="row"><div class="m"><div class="t num">Your position · ' + usd(p.sizeUsd, 2) + " in · " + p.bot + '</div><div class="s">' + (open ? "Open · stop " + usd(p.stop) : "Closed · " + esc(p.exitReason || "") + (p.pnlUsd != null ? " · " + usd(p.pnlUsd, 2) + " net" : "")) + (p.feesUsd != null ? " · " + usd(p.feesUsd, 2) + " fees" : "") + "</div></div></div></div>" :
         '<div class="rows" style="margin-top:14px"><div class="row"><div class="m"><div class="s">No position in this coin</div></div><button style="color:var(--blue);min-height:44px" data-go="/audit/' + esc(mint) + '">Audit</button></div></div>') +
       '<div class="btns"><a class="btn blue" href="' + esc(c.link) + '" target="_blank" rel="noopener noreferrer">Open on FOMO</a><button class="btn red" data-sell="' + esc(mint) + '"' + (canSell ? "" : " disabled") + ">Sell now</button></div>" +
       (open && PLAN !== "A" ? '<div class="note">Read-only copy: sell through Telegram (Step 11).</div>' : "") +
@@ -315,7 +317,7 @@
   }
   function loadCoin(m) {
     if (S.coin["_l" + m]) return; S.coin["_l" + m] = 1;
-    D.coin(m).then(function (c) { S.coin[m] = c; }).catch(function () { S.coin[m] = null; }).then(function () { delete S.coin["_l" + m]; render(); });
+    D.coin(m).then(function (c) { S.coin[m] = c; }).catch(function (e) { S.coin[m] = e && e.status === 404 ? null : { _err: (e && e.message) || "offline" }; }).then(function () { delete S.coin["_l" + m]; render(); });
   }
   function sellSheet(mint) {
     var d = document.createElement("div"); d.className = "scrim"; S.sell = { mint: mint, pct: 100 };
@@ -357,6 +359,20 @@
       row("Notifications on this phone", PLAN === "B" ? "Plan B: Telegram only" : "Home screen app only · Step 11", s.pushes.webpush ? '<span class="up">On</span>' : '<span style="color:var(--ter)">Off</span>') +
       row("Send test push", s.pushes.count ? "Last: " + esc(s.pushes.recent[s.pushes.recent.length - 1]) : "Queued for Telegram (sent once the bot token is set) · logs/push.log", ro ? "" : '<span style="color:var(--blue)">Send</span>', ro ? "" : "data-testpush") + "</div>" +
       '<div class="grp">Grok Bot</div><div class="rows">' + row("Watch in Grok Bot", "Your own computer preview · link not set yet", '<span style="color:var(--ter)">Not set</span>') + "</div>";
+    var props = s.proposals || [];
+    if (props.length) {
+      html += '<div class="grp">Pending proposals</div><div class="rows">';
+      props.forEach(function (p) {
+        html += '<div class="set"><div class="h"><span class="n">' + esc((p.key || "").replace(/_/g, " ")) + '</span></div>' +
+          '<div class="s num">' + esc(String(p.old)) + ' → ' + esc(String(p.new)) + '</div>' +
+          '<div class="s">' + esc(p.reason || "") + '</div>' +
+          (ro ? '<div class="note">Read-only copy: approve in the live app or through Telegram.</div>'
+              : '<div class="h" style="margin-top:8px;gap:8px"><button class="btn" data-approve="' + p.id + '">Approve</button>' +
+                '<button class="btn" data-reject="' + p.id + '">Reject</button></div>') +
+          "</div>";
+      });
+      html += "</div>";
+    }
     Object.keys(s.settings).forEach(function (g) {
       html += '<div class="grp" id="set-' + g + '">' + esc(GROUP_BOT[g] || g) + ' settings</div><div class="rows">' + s.settings[g].map(function (x) { return setting(x, ro); }).join("") + "</div>";
     });
@@ -404,7 +420,7 @@
 
   // ---------- events ----------
   function onClick(ev) {
-    var t = ev.target.closest("[data-stop],[data-tab],[data-go],[data-back],[data-range],[data-full],[data-close],[data-search],[data-sell],[data-pct],[data-confirm],[data-pause],[data-mode],[data-golive],[data-bool],[data-share],[data-href],[data-testpush]");
+    var t = ev.target.closest("[data-stop],[data-tab],[data-go],[data-back],[data-range],[data-full],[data-close],[data-search],[data-sell],[data-pct],[data-confirm],[data-pause],[data-mode],[data-golive],[data-bool],[data-share],[data-href],[data-testpush],[data-approve],[data-reject]");
     if (!t) return;
     if (t.hasAttribute("data-stop")) return;
     var ov = t.closest(".scrim,.full,.search");
@@ -437,6 +453,8 @@
       fallbackCopy(u); return done();
     }
     if (t.hasAttribute("data-testpush")) return api("/api/push/test", {}).then(function (r) { toast("Test push · " + r.sent_to); refresh(); }).catch(function (e) { toast(e.message); });
+    if (t.dataset.approve) return api("/api/proposals/" + t.dataset.approve + "/approve", {}).then(function () { toast("Proposal approved"); refresh(); }).catch(function (e) { toast(e.message); });
+    if (t.dataset.reject) return api("/api/proposals/" + t.dataset.reject + "/reject", {}).then(function () { toast("Proposal rejected"); refresh(); }).catch(function (e) { toast(e.message); });
   }
   function fallbackCopy(u) { var i = document.createElement("textarea"); i.value = u; document.body.appendChild(i); i.select(); try { document.execCommand("copy"); } catch (e) {} i.remove(); }
   document.addEventListener("change", function (ev) {
