@@ -19,6 +19,12 @@
   function b64(s) { var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
   function b64u(s) { s = s.replace(/-/g, "+").replace(/_/g, "/"); while (s.length % 4) s += "="; return b64(s); }
   var keyP = DK ? crypto.subtle.importKey("raw", b64u(DK.k), { name: "AES-GCM" }, false, ["decrypt"]) : null;
+  var macP = DK ? crypto.subtle.importKey("raw", b64u(DK.k), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]) : null;
+  function coinName(mint) {   // same as publish.coin_name: c/{HMAC-SHA256(key, "coin:"+mint) hex[:32]}.json
+    return macP.then(function (k) { return crypto.subtle.sign("HMAC", k, new TextEncoder().encode("coin:" + mint)); }).then(function (sig) {
+      return "c/" + Array.prototype.map.call(new Uint8Array(sig), function (b) { return ("0" + b.toString(16)).slice(-2); }).join("").slice(0, 32) + ".json";
+    });
+  }
   function dec(name) {
     return fetch("d/" + DK.p + "/" + name + ".enc?c=" + Date.now(), { cache: "no-store" })
       .then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); })
@@ -36,7 +42,7 @@
     state: function () { return PLAN === "A" ? api("/api/state") : decJSON("state.json"); },
     chart: function () { return PLAN === "A" ? api("/api/chart") : decJSON("chart.json"); },
     activity: function () { return PLAN === "A" ? api("/api/activity?limit=50") : decJSON("activity.json"); },
-    coin: function (m) { return PLAN === "A" ? api("/api/coin/" + encodeURIComponent(m)) : decJSON("coin/" + m + ".json"); },
+    coin: function (m) { return PLAN === "A" ? api("/api/coin/" + encodeURIComponent(m)) : coinName(m).then(decJSON); },
     search: function (q) {
       if (PLAN === "A") return api("/api/search?q=" + encodeURIComponent(q));
       q = q.toLowerCase();
