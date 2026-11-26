@@ -355,7 +355,7 @@
       '</select></div><div class="h" style="margin-top:8px"><span class="n">Time</span><input type="time" data-cp="at" value="' + esc(cp.at || "") + '"' + (ro ? " disabled" : "") + "></div></div></div>" +
       '<div class="grp">Pushes</div><div class="rows">' + row("Telegram", esc(s.pushes.note), s.pushes.telegram ? '<span class="up">Connected</span>' : '<span style="color:var(--ter)">Not connected</span>') +
       row("Notifications on this phone", PLAN === "B" ? "Plan B: Telegram only" : "Home screen app only · Step 11", s.pushes.webpush ? '<span class="up">On</span>' : '<span style="color:var(--ter)">Off</span>') +
-      row("Send test push", s.pushes.count ? "Last: " + esc(s.pushes.recent[s.pushes.recent.length - 1]) : "Goes to logs/push.log until Telegram (Step 11)", ro ? "" : '<span style="color:var(--blue)">Send</span>', ro ? "" : "data-testpush") + "</div>" +
+      row("Send test push", s.pushes.count ? "Last: " + esc(s.pushes.recent[s.pushes.recent.length - 1]) : "Queued for Telegram (sent once the bot token is set) · logs/push.log", ro ? "" : '<span style="color:var(--blue)">Send</span>', ro ? "" : "data-testpush") + "</div>" +
       '<div class="grp">Grok Bot</div><div class="rows">' + row("Watch in Grok Bot", "Your own computer preview · link not set yet", '<span style="color:var(--ter)">Not set</span>') + "</div>";
     Object.keys(s.settings).forEach(function (g) {
       html += '<div class="grp" id="set-' + g + '">' + esc(GROUP_BOT[g] || g) + ' settings</div><div class="rows">' + s.settings[g].map(function (x) { return setting(x, ro); }).join("") + "</div>";
