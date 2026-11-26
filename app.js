@@ -1,6 +1,9 @@
 // Desk app · STEP 10. Two data sources, one renderer:
 //   plan A: the desk API. The link carries #t=<APP_TOKEN> once; it moves to localStorage and leaves the address bar.
-//   plan B: GitHub Pages. The link carries #d=<path>.<key> once; files are AES-256-GCM, AAD = file name.
+//   plan B: GitHub Pages. The link carries #d=<path>.<key>. Files are AES-256-GCM, AAD = file name.
+//   In Safari (not standalone) the #d= fragment stays in the address bar so Add to Home Screen captures it
+//   (iOS home-screen apps have their own localStorage, separate from Safari). In standalone, #d= is read
+//   into localStorage on launch; the fragment may stay. The key never goes to the server (it is a hash).
 // Never a made-up number: anything the desk doesn't send renders as an empty state.
 (function () {
   "use strict";
@@ -9,10 +12,27 @@
   var route0 = (H.match(/[#&]r=([^&]+)/) || [])[1];
   if (mt) { LS.setItem("desk_t", mt[1]); LS.removeItem("desk_d"); }
   if (md) { LS.setItem("desk_d", JSON.stringify({ p: md[1], k: md[2] })); LS.removeItem("desk_t"); }
-  if (mt || md) history.replaceState(null, "", location.pathname + location.search + "#" + (route0 ? decodeURIComponent(route0) : "/home"));
   var TOKEN = LS.getItem("desk_t"), DK = null;
   try { DK = JSON.parse(LS.getItem("desk_d") || "null"); } catch (e) {}
   var PLAN = TOKEN ? "A" : (DK ? "B" : null);
+  function isStandalone() {
+    return (window.navigator && navigator.standalone === true) ||
+      (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+  }
+  // Safari: keep or restore #d=<path>.<key> so Share > Add to Home Screen saves the key.
+  // Standalone: leave the fragment as-is (already stored if it was present).
+  if (DK && DK.p && DK.k && !isStandalone()) {
+    var keep = "#d=" + DK.p + "." + DK.k;
+    var rt = route0 ? decodeURIComponent(route0) : "";
+    if (!rt) {
+      var legacy = H.replace(/^#/, "");
+      if (legacy.charAt(0) === "/" && legacy.indexOf("d=") < 0 && legacy.indexOf("t=") < 0) rt = legacy;
+    }
+    if (rt && rt !== "/home") keep += "&r=" + rt;
+    history.replaceState(null, "", location.pathname + location.search + keep);
+  } else if (mt) {
+    history.replaceState(null, "", location.pathname + location.search + "#" + (route0 ? decodeURIComponent(route0) : "/home"));
+  }
   var RM = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ---------- data ----------
@@ -103,8 +123,25 @@
   // ---------- app state ----------
   var S = { state: null, chart: null, activity: null, coin: {}, lastOk: 0, err: null, retryAt: 0, range: LS.getItem("desk_range") || "LIVE", frame: null, frameCoin: null, prevPts: 0, sell: null };
   var view;
-  function route() { var h = location.hash.replace(/^#/, "") || "/home"; var p = h.split("/").filter(Boolean); return { name: p[0] || "home", arg: p[1] }; }
-  function go(path) { location.hash = "#" + path; }
+  function route() {
+    var raw = location.hash.replace(/^#/, "");
+    var rMatch = raw.match(/(?:^|&)r=([^&]*)/);
+    var path;
+    if (rMatch) path = decodeURIComponent(rMatch[1] || "");
+    else if (!raw || /^(?:d|t)=/.test(raw)) path = "/home";
+    else path = raw.charAt(0) === "/" ? raw : "/" + raw;
+    var p = path.split("/").filter(Boolean);
+    return { name: p[0] || "home", arg: p[1] };
+  }
+  function go(path) {
+    if (path.charAt(0) !== "/") path = "/" + path;
+    var h = "#" + path;
+    if (DK && DK.p && DK.k) {
+      h = "#d=" + DK.p + "." + DK.k;
+      if (path !== "/home") h += "&r=" + path;
+    }
+    location.hash = h;
+  }
 
   // ---------- shell ----------
   function shell() {
@@ -533,6 +570,6 @@
     setInterval(function () { if (Date.now() >= (S.err ? S.retryAt : S.nextAt || 0)) refresh(); var e = $("#errrow"); if (e && S.err) e.textContent = errRow().replace(/<[^>]+>/g, ""); }, 1000);
     setInterval(function () { if (route().name === "home" && !S.err || route().name === "home" && PLAN === "B") pullFrame(); }, PLAN === "A" ? 1000 : 15000);
     setTimeout(pullFrame, 300);
-    if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(function () {});
+    if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js?v=8c").catch(function () {});
   }
 })();
