@@ -1,20 +1,14 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="referrer" content="no-referrer">
-<title>Desk</title>
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Grok Bot">
+<title>Grok Bot</title>
 <link rel="manifest" href="manifest.json"><link rel="stylesheet" href="app.css">
 </head><body>
-<main class="offline" id="offline"><h1>Desk offline</h1>
-<p id="why">The desk is not publishing data yet.</p></main>
-<main class="live" id="live" hidden>
-  <header><h1 id="mode">Desk</h1><span id="updated"></span></header>
-  <section class="cards">
-    <div class="card"><b id="cash">-</b><span>cash</span></div>
-    <div class="card"><b id="open">-</b><span>open positions</span></div>
-    <div class="card"><b id="bots">-</b><span>bots alive</span></div>
-  </section>
-  <img id="screen" alt="desk screen" hidden>
-</main>
+<div id="view"></div>
 <script src="chart.js"></script><script src="app.js"></script>
 </body></html>
