@@ -91,6 +91,7 @@
   function age(s) { if (s == null) return null; s = Math.max(0, s); return s < 3600 ? Math.round(s / 60) + "m" : s < 86400 ? Math.round(s / 3600) + "h" : Math.round(s / 86400) + "d"; }
   function short(m) { return m ? m.slice(0, 4) + "…" + m.slice(-4) : ""; }
   var BOTN = { scanner: "Scanner", analyst: "Analyst", brain: "Brain", executor: "Executor", risk: "Risk" };
+  var BOTGIVEN = { scanner: "Sara", analyst: "Allen", brain: "Brian", executor: "Eli", risk: "Richard" };
   var BOTC = { scanner: "#64d2ff", analyst: "#ffd60a", brain: "#bf5af2", executor: "#00d35a", risk: "#ff6b9a" };
   function fomoA(link, label) { return link ? '<a class="fomo" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer" data-stop>' + esc(label || "Open on FOMO") + "</a>" : ""; }
   function toast(t) { var e = document.createElement("div"); e.className = "toast"; e.textContent = t; document.body.appendChild(e); setTimeout(function () { e.remove(); }, 1800); }
@@ -191,9 +192,11 @@
   }
   function aico(b, c) {
     var st = c && c.paused ? "pz" : (c && c.alive) ? "run" : "off";
-    return '<span class="aico ' + st + " " + b + '" aria-hidden="true"><img src="icons/agents/' + b + '.webp?v=8e" alt=""></span>';
+    return '<span class="aico ' + st + " " + b + '" aria-hidden="true"><img src="icons/agents/' + b + '.webp?v=8f" alt=""></span>';
   }
-  function botHd(b, c) { return '<div class="hd">' + aico(b, c) + '<span class="nm" style="color:' + c.color + '">' + BOTN[b] + "</span></div>"; }
+  function botHd(b, c) {
+    return '<div class="hd">' + aico(b, c) + '<div class="id"><span class="nm" style="color:' + c.color + '">' + esc(BOTGIVEN[b] || BOTN[b]) + '</span><span class="rl">' + esc(BOTN[b]) + "</span></div></div>";
+  }
   function botCard(b, c) {
     var body = "";
     if (b === "scanner") body = '<div class="feed">' + (c.feed.slice(0, 3).map(scanLine).join("") || '<span>No pools yet tonight</span>') + "</div>";
@@ -285,7 +288,7 @@
           esc(f.symbol) + " · " + esc(f.action);
         return '<div class="dec"><span class="num">' + txt + ' <span style="color:var(--ter)">' + tm(f.ts) + "</span></span>" + fomoA(f.link, "FOMO") + "</div>";
       };
-      return '<div class="card bfull"><div class="top">' + aico(b, c) + '<div style="flex:1"><div style="font-weight:600;color:' + c.color + '">' + BOTN[b] + '</div><div class="s" style="color:var(--sec);font-size:13px">' + status + " · " + esc(c.headline) + " today</div></div>" +
+      return '<div class="card bfull"><div class="top">' + aico(b, c) + '<div style="flex:1"><div style="font-weight:600;color:' + c.color + '">' + esc(BOTGIVEN[b] || BOTN[b]) + '</div><div class="s" style="color:var(--sec);font-size:13px">' + esc(BOTN[b]) + " · " + status + " · " + esc(c.headline) + " today</div></div>" +
         '<div class="swwrap" ' + (ro || c.pauseLocked ? "" : 'data-pause="' + b + '"') + ' title="' + (c.pauseLocked ? "Locked while a position is open" : "Pause") + '"><span class="sw ' + (c.paused ? "" : "on") + (c.pauseLocked || ro ? " locked" : "") + '"></span></div></div>' +
         (c.pauseLocked ? '<div class="note" style="padding:6px 0">Locked while a position is open</div>' : "") +
         '<div style="margin-top:8px">' + (feed.slice(0, 20).map(line).join("") || '<div class="dec"><span style="color:var(--sec)">Nothing yet tonight</span></div>') + "</div>" +
@@ -416,7 +419,7 @@
       html += "</div>";
     }
     Object.keys(s.settings).forEach(function (g) {
-      html += '<div class="grp" id="set-' + g + '">' + (BOTN[g] ? aico(g, (s.bots && s.bots[g]) || {}) : "") + esc(GROUP_BOT[g] || g) + ' settings</div><div class="rows">' + s.settings[g].map(function (x) { return setting(x, ro); }).join("") + "</div>";
+      html += '<div class="grp" id="set-' + g + '">' + (BOTN[g] ? aico(g, (s.bots && s.bots[g]) || {}) + esc(BOTGIVEN[g] || BOTN[g]) + " · " : "") + esc(GROUP_BOT[g] || g) + ' settings</div><div class="rows">' + s.settings[g].map(function (x) { return setting(x, ro); }).join("") + "</div>";
     });
     if (ro) html += '<div class="note">Read-only copy (plan B): settings, mode, pause and sell go through Telegram (Step 11).</div>';
     return html;
@@ -575,6 +578,6 @@
     setInterval(function () { if (Date.now() >= (S.err ? S.retryAt : S.nextAt || 0)) refresh(); var e = $("#errrow"); if (e && S.err) e.textContent = errRow().replace(/<[^>]+>/g, ""); }, 1000);
     setInterval(function () { if (route().name === "home" && !S.err || route().name === "home" && PLAN === "B") pullFrame(); }, PLAN === "A" ? 1000 : 15000);
     setTimeout(pullFrame, 300);
-    if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js?v=8e").catch(function () {});
+    if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js?v=8f").catch(function () {});
   }
 })();

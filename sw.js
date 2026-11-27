@@ -1,7 +1,7 @@
-// CACHE_V=8e · caches agent icons only; version query busts the registered script.
+// CACHE_V=8f · caches agent icons only; version query busts the registered script.
 // Desk data is never cached. Web push lands in Step 11 (POST /api/push, VAPID public key only here).
 // Until then it only shows a push if one arrives.
-var CACHE_V = "8e";
+var CACHE_V = "8f";
 var ICON_CACHE = "desk-icons-" + CACHE_V;
 var AGENT_ICONS = ["scanner", "analyst", "brain", "executor", "risk"].map(function (b) {
   return "icons/agents/" + b + ".webp?v=" + CACHE_V;
