@@ -40,7 +40,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .odo .d{display:inline-block;height:1.05em;overflow:hidden;position:relative}
 .odo .col{display:flex;flex-direction:column;transition:transform 600ms ease-out}
 .odo .col span{display:block;height:1.05em;line-height:1.05em;text-align:center}
-@media (prefers-reduced-motion:reduce){.odo .col{transition:none!important}.beam{animation:none!important}.sk{animation:none!important}}
+@media (prefers-reduced-motion:reduce){.odo .col{transition:none!important}.beam{animation:none!important}.sk{animation:none!important}.aico.run,.aico.run::before{animation:none!important}.aico.run{box-shadow:0 0 0 1px color-mix(in srgb,var(--aico) 45%,transparent)}}
 /* chart */
 .chartwrap{position:relative;margin:12px calc(-1*var(--g)) 0;height:220px}
 .chartwrap canvas{width:100%;height:100%;display:block}
@@ -141,7 +141,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .set input[type=number],.set input[type=text],.set input[type=time],.set select,.field{background:var(--card2);color:var(--text);border:0;border-radius:8px;padding:8px 10px;font:inherit;font-variant-numeric:tabular-nums;width:110px;min-height:36px}
 .set input[type=range]{width:100%;margin-top:8px;accent-color:var(--green);min-height:30px}
 .set .mm{display:flex;justify-content:space-between;color:var(--ter);font-size:11px}
-.grp{font-size:13px;color:var(--sec);margin:22px 4px 6px}
+.grp{font-size:13px;color:var(--sec);margin:22px 4px 6px;display:flex;align-items:center;gap:8px}
 .note{color:var(--sec);font-size:13px;padding:10px 14px}
 .toast{position:fixed;left:50%;bottom:calc(var(--tab) + 24px);transform:translateX(-50%);background:var(--card2);border-radius:999px;padding:10px 16px;font-size:14px;z-index:30}
 /* tab bar */
@@ -167,3 +167,25 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 @keyframes pulse{from{opacity:.5}to{opacity:1}}
 h1.pg{font-size:34px;font-weight:700;margin:6px 0 14px;font-family:var(--display)}
 .dec>span:first-child{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* agent icons */
+.aico{--aico:var(--cyan);position:relative;width:32px;height:32px;flex:0 0 32px;display:inline-flex;align-items:center;justify-content:center;border-radius:28%}
+.aico img{width:100%;height:100%;border-radius:28%;display:block;position:relative;z-index:1}
+.bc .hd .aico{width:28px;height:28px;flex-basis:28px}
+.bfull .top .aico{width:36px;height:36px;flex-basis:36px}
+.grp .aico{width:22px;height:22px;flex-basis:22px}
+.aico.scanner{--aico:var(--cyan)}
+.aico.analyst{--aico:var(--purple)}
+.aico.brain{--aico:var(--pink)}
+.aico.executor{--aico:var(--green)}
+.aico.risk{--aico:var(--orange)}
+.aico.run{box-shadow:0 0 0 1px color-mix(in srgb,var(--aico) 40%,transparent),0 0 8px color-mix(in srgb,var(--aico) 45%,transparent);animation:aico-glow 3.2s ease-in-out infinite}
+.aico.analyst.run{animation-duration:3.6s}
+.aico.brain.run{animation-duration:4s}
+.aico.executor.run{animation-duration:2.4s}
+.aico.risk.run{animation-duration:4.5s}
+.aico.scanner.run::before{content:"";position:absolute;inset:-4px;border-radius:32%;pointer-events:none;background:conic-gradient(from 0deg,transparent 0 68%,var(--cyan) 100%);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 2px));mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 2px));animation:aico-spin 7s linear infinite;opacity:.7}
+.aico.pz{opacity:.45;filter:saturate(.65)}
+.aico.off{opacity:.34;filter:grayscale(.3) saturate(.55)}
+@keyframes aico-glow{0%,100%{box-shadow:0 0 0 1px color-mix(in srgb,var(--aico) 28%,transparent),0 0 4px color-mix(in srgb,var(--aico) 28%,transparent)}50%{box-shadow:0 0 0 2px color-mix(in srgb,var(--aico) 55%,transparent),0 0 10px color-mix(in srgb,var(--aico) 55%,transparent)}}
+@keyframes aico-spin{to{transform:rotate(360deg)}}

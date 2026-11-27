@@ -189,7 +189,11 @@
       '<div class="carousel">' + bots.map(function (b) { return botCard(b, s.bots[b]); }).join("") + "</div>" +
       '<div class="sect"><h2>Activity</h2><button data-go="/activity">See all</button></div>' + actRows((S.activity || []).slice(0, 5), "Waiting for the first trade");
   }
-  function botHd(b, c) { return '<div class="hd"><span class="sdot ' + (c.paused ? "pz" : c.alive ? "" : "off") + '"></span><span class="nm" style="color:' + c.color + '">' + BOTN[b] + "</span></div>"; }
+  function aico(b, c) {
+    var st = c && c.paused ? "pz" : (c && c.alive) ? "run" : "off";
+    return '<span class="aico ' + st + " " + b + '" aria-hidden="true"><img src="icons/agents/' + b + '.webp?v=8e" alt=""></span>';
+  }
+  function botHd(b, c) { return '<div class="hd">' + aico(b, c) + '<span class="nm" style="color:' + c.color + '">' + BOTN[b] + "</span></div>"; }
   function botCard(b, c) {
     var body = "";
     if (b === "scanner") body = '<div class="feed">' + (c.feed.slice(0, 3).map(scanLine).join("") || '<span>No pools yet tonight</span>') + "</div>";
@@ -281,7 +285,7 @@
           esc(f.symbol) + " · " + esc(f.action);
         return '<div class="dec"><span class="num">' + txt + ' <span style="color:var(--ter)">' + tm(f.ts) + "</span></span>" + fomoA(f.link, "FOMO") + "</div>";
       };
-      return '<div class="card bfull"><div class="top"><span class="sdot ' + (c.paused ? "pz" : c.alive ? "" : "off") + '"></span><div style="flex:1"><div style="font-weight:600;color:' + c.color + '">' + BOTN[b] + '</div><div class="s" style="color:var(--sec);font-size:13px">' + status + " · " + esc(c.headline) + " today</div></div>" +
+      return '<div class="card bfull"><div class="top">' + aico(b, c) + '<div style="flex:1"><div style="font-weight:600;color:' + c.color + '">' + BOTN[b] + '</div><div class="s" style="color:var(--sec);font-size:13px">' + status + " · " + esc(c.headline) + " today</div></div>" +
         '<div class="swwrap" ' + (ro || c.pauseLocked ? "" : 'data-pause="' + b + '"') + ' title="' + (c.pauseLocked ? "Locked while a position is open" : "Pause") + '"><span class="sw ' + (c.paused ? "" : "on") + (c.pauseLocked || ro ? " locked" : "") + '"></span></div></div>' +
         (c.pauseLocked ? '<div class="note" style="padding:6px 0">Locked while a position is open</div>' : "") +
         '<div style="margin-top:8px">' + (feed.slice(0, 20).map(line).join("") || '<div class="dec"><span style="color:var(--sec)">Nothing yet tonight</span></div>') + "</div>" +
@@ -412,7 +416,7 @@
       html += "</div>";
     }
     Object.keys(s.settings).forEach(function (g) {
-      html += '<div class="grp" id="set-' + g + '">' + esc(GROUP_BOT[g] || g) + ' settings</div><div class="rows">' + s.settings[g].map(function (x) { return setting(x, ro); }).join("") + "</div>";
+      html += '<div class="grp" id="set-' + g + '">' + (BOTN[g] ? aico(g, (s.bots && s.bots[g]) || {}) : "") + esc(GROUP_BOT[g] || g) + ' settings</div><div class="rows">' + s.settings[g].map(function (x) { return setting(x, ro); }).join("") + "</div>";
     });
     if (ro) html += '<div class="note">Read-only copy (plan B): settings, mode, pause and sell go through Telegram (Step 11).</div>';
     return html;
@@ -571,6 +575,6 @@
     setInterval(function () { if (Date.now() >= (S.err ? S.retryAt : S.nextAt || 0)) refresh(); var e = $("#errrow"); if (e && S.err) e.textContent = errRow().replace(/<[^>]+>/g, ""); }, 1000);
     setInterval(function () { if (route().name === "home" && !S.err || route().name === "home" && PLAN === "B") pullFrame(); }, PLAN === "A" ? 1000 : 15000);
     setTimeout(pullFrame, 300);
-    if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js?v=8d").catch(function () {});
+    if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js?v=8e").catch(function () {});
   }
 })();
